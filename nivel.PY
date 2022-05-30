@@ -2,6 +2,7 @@ import pygame
 from config import *
 from jogador import Jogador
 from tile import Tile
+from depuracao import depuracao
 
 
 class Nivel:
@@ -22,11 +23,17 @@ class Nivel:
                 y = indice_linha * TILESIZE    
                 if coluna == 'x':
                     Tile((x,y), [self.sprites_visiveis])  
+                if coluna == 'p':
+                    self.jogador = Jogador((x, y), [self. sprites_visiveis])
+                
                                               
                                      
         
     def executar(self):
         # ATUALIZAR E DESENHAR O JOGO
         self.sprites_visiveis.draw(self.exibe_superfice)
+        self.sprites_visiveis.update()
+        depuracao(self.jogador.direcao)
+        
     
    
