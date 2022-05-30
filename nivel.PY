@@ -22,9 +22,9 @@ class Nivel:
                 x = indice_col * TILESIZE
                 y = indice_linha * TILESIZE    
                 if coluna == 'x':
-                    Tile((x,y), [self.sprites_visiveis])  
+                    Tile((x,y), [self.sprites_visiveis, self.sprites_obstaculos])  
                 if coluna == 'p':
-                    self.jogador = Jogador((x, y), [self. sprites_visiveis])
+                    self.jogador = Jogador((x, y), [self. sprites_visiveis],self.sprites_obstaculos)
                 
                                               
                                      
