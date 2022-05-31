@@ -44,11 +44,18 @@ class MovimentoCamera(pygame.sprite.Group):
         self.metade_altura = self.exibe_superfice.get_size()[1] //2  # METADE DA ALTURA TELA
         self.deslocamento_tela = pygame.math.Vector2() # CRIANDO VETOR DE DESLOCAMENTO DE TELA
          
-    
+        #CRIANDO O FUNDO 'MAPA'
+        self.fundo_mapa = pygame.image.load('graphics/tilemap/ground.png')
+        self.mapa_rect = self.fundo_mapa.get_rect(topleft = (0,0))
+        
     def desenho_customizado(self,jogador):
         # OBTER DESLOCAMENTO 
         self.deslocamento_tela.x = jogador.rect.centerx - self.metade_largura
         self.deslocamento_tela.y = jogador.rect.centery - self.metade_altura
+      
+        
+        pos_fundo_mapa = self.mapa_rect.topleft - self.deslocamento_tela
+        self.exibe_superfice.blit(self.fundo_mapa,pos_fundo_mapa)
         
         for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):
             deslocamento_pos = sprite.rect.topleft - self.deslocamento_tela
