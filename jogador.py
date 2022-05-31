@@ -6,7 +6,7 @@ class Jogador(pygame.sprite.Sprite):
         super().__init__(groups)
         self.image = pygame.image.load('graphics/test/player.png').convert_alpha() # CARREGANDO IMAGEM
         self.rect = self.image.get_rect(topleft =pos)  # CRIANDO E POSICIONANDO A IMAGEM 
-        
+        self.ponto_colisao = self.rect.inflate(0,-26) # DIMINUI OS SPRITES NO PONTO DE COLISAO JOGADOR
         self.direcao = pygame.math.Vector2()
         self.speed = 5
         
@@ -34,28 +34,27 @@ class Jogador(pygame.sprite.Sprite):
             self.direcao = self.direcao.normalize()   # REDUZIR VELOCIDAD NA DIAGONAL
         
         
-        self.rect.x += self.direcao.x * speed       
+        self.ponto_colisao.x += self.direcao.x * speed       
         self.colisao('horizontal')                  # COLISAO HORIZONTAL
-        self.rect.y += self.direcao.y * speed
+        self.ponto_colisao.y += self.direcao.y * speed
         self.colisao('vertical')                    # COLISAO VERTICAL
-        
+        self.rect.center = self.ponto_colisao.center
     def colisao(self,direcao):
         if direcao == 'horizontal':
             for sprite in self.sprites_obstaculos:
-                if sprite.rect.colliderect(self.rect):
+                if sprite.ponto_colisao.colliderect(self.ponto_colisao):
                     if self.direcao.x > 0: # MOVENDO PARA DIREITA
-                        self.rect.right = sprite.rect.left  # COLISAO
-                        print("bateu")
+                        self.ponto_colisao.right = sprite.ponto_colisao.left  # COLISAO
                     if self.direcao.x < 0: # MOVENDO PARA ESQUERDA
-                        self.rect.left = sprite.rect.right # COLISAO
+                        self.ponto_colisao.left = sprite.ponto_colisao.right # COLISAO
                         
         if direcao == 'vertical':
             for sprite in self.sprites_obstaculos:
-                if sprite.rect.colliderect(self.rect):
+                if sprite.ponto_colisao.colliderect(self.ponto_colisao):
                     if self.direcao.y > 0: # MOVENDO PARA BAIXO
-                        self.rect.bottom = sprite.rect.top  # COLISAO
+                        self.ponto_colisao.bottom = sprite.ponto_colisao.top  # COLISAO
                     if self.direcao.y < 0: # MOVENDO PARA CIMA
-                        self.rect.top = sprite.rect.bottom # COLISAO
+                        self.ponto_colisao.top = sprite.ponto_colisao.bottom # COLISAO
                     
             
     def update(self):
