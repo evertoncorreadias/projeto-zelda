@@ -3,6 +3,8 @@ from config import *
 from jogador import Jogador
 from tile import Tile
 from depuracao import depuracao
+from suporte import *
+from random import choice
 
 
 class Nivel:
@@ -17,14 +19,34 @@ class Nivel:
         
         
     def criar_mapa(self):
-        for indice_linha,linha in enumerate(WORLD_MAP):      # PERCORRE CADA POSIÇAO DO MAPA INDICANDO O INDICE
-            for indice_col,coluna in enumerate(linha):
-                x = indice_col * TILESIZE
-                y = indice_linha * TILESIZE    
-                if coluna == 'x':
-                    Tile((x,y), [self.sprites_visiveis, self.sprites_obstaculos])  
-                if coluna == 'p':
-                    self.jogador = Jogador((x, y), [self. sprites_visiveis],self.sprites_obstaculos)
+        
+        layouts = {
+            'limite': importar_csv_layout('map/map_FloorBlocks.csv'),
+            'grama': importar_csv_layout('map/map_Grass.csv'),
+            'objeto': importar_csv_layout('map/map_Objects.csv')
+        }
+        
+        graficos = {
+            'grama' : importar_pasta('graphics/Grass'),
+            'objeto' : importar_pasta('graphics/objects')
+        }
+        for estilo,layout in layouts.items():
+            for indice_linha,linha in enumerate(layout):      # PERCORRE CADA POSIÇAO DO MAPA INDICANDO O INDICE
+                for indice_col,coluna in enumerate(linha):
+                    if coluna != '-1':
+                        x = indice_col * TILESIZE
+                        y = indice_linha * TILESIZE    
+                        if estilo == 'limite':
+                            Tile( (x, y), [self.sprites_obstaculos],'invisivel')
+                        if estilo == 'grama':
+                            imagem_grama_aleatoria = choice(graficos['grama'])
+                            Tile((x, y), [self.sprites_visiveis, self.sprites_obstaculos],'grama',imagem_grama_aleatoria)
+                            
+                        if estilo == 'objeto':
+                            superficie = graficos['objeto'][int(coluna)]
+                            Tile((x, y), [self.sprites_visiveis, self.sprites_obstaculos],'objeto', superficie)
+   
+        self.jogador = Jogador((2000,1430), [self. sprites_visiveis],self.sprites_obstaculos)
                 
                                               
                                      
