@@ -1,10 +1,12 @@
 import pygame
+from arma import Arma
 from config import *
 from jogador import Jogador
 from tile import Tile
 from depuracao import depuracao
 from suporte import *
 from random import choice
+from arma import Arma
 
 
 class Nivel:
@@ -14,10 +16,13 @@ class Nivel:
         # GRUPOS DE SPRITES
         self.sprites_visiveis = MovimentoCamera()# pygame.sprite.Group()/modificado com criaçao a camera # GRUPO COM SPRITES VISÍVEIS
         self.sprites_obstaculos = pygame.sprite.Group() # GRUPO DE SPRITES OBSTACULOS 
+        
+        # SPRITE ATAQUE
+        self.ataque_atual = None
+        
         # CONFIGURAÇÃO DE SPRITES
         self.criar_mapa()
-        
-        
+               
     def criar_mapa(self):
         
         layouts = {
@@ -46,18 +51,23 @@ class Nivel:
                             superficie = graficos['objeto'][int(coluna)]
                             Tile((x, y), [self.sprites_visiveis, self.sprites_obstaculos],'objeto', superficie)
    
-        self.jogador = Jogador((2000,1430), [self. sprites_visiveis],self.sprites_obstaculos)
-                
-                                              
-                                     
-        
+        self.jogador = Jogador((2000,1430), [self. sprites_visiveis],self.sprites_obstaculos, self.criar_ataque, self.destruir_arma)
+    
+    def criar_ataque(self):
+        self.ataque_atual = Arma(self.jogador,[self.sprites_visiveis])
+    
+    def destruir_arma(self): 
+        if self.ataque_atual:
+            self.ataque_atual.kill()
+        self.ataque_atual = None
+           
+                                                                                                         
     def executar(self):
         # ATUALIZAR E DESENHAR O JOGO
         self.sprites_visiveis.desenho_customizado(self.jogador)  # draw(self.exibe_superfice) SUBSTITUIDO PELA FUNÇAO CRIADA
         self.sprites_visiveis.update()
-        depuracao(self.jogador.direcao)
-        
-        
+        depuracao(self.jogador.estatus)
+            
 class MovimentoCamera(pygame.sprite.Group):
     def __init__(self):
         super().__init__(self)

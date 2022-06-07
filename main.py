@@ -4,7 +4,7 @@ from nivel import Nivel
 
 
 class Jogo:
-    def __init__(self):
+    def __init__(self):   
 
         pygame.init()
         self.janela = pygame.display.set_mode((LARGURA, ALTURA))
