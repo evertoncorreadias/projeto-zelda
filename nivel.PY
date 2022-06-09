@@ -7,6 +7,7 @@ from depuracao import depuracao
 from suporte import *
 from random import choice
 from arma import Arma
+from ui import UI
 
 
 class Nivel:
@@ -22,6 +23,10 @@ class Nivel:
         
         # CONFIGURAÇÃO DE SPRITES
         self.criar_mapa()
+        
+        # INTERFACE DO USUARIO
+        self.ui = UI()
+        
                
     def criar_mapa(self):
         
@@ -66,7 +71,9 @@ class Nivel:
         # ATUALIZAR E DESENHAR O JOGO
         self.sprites_visiveis.desenho_customizado(self.jogador)  # draw(self.exibe_superfice) SUBSTITUIDO PELA FUNÇAO CRIADA
         self.sprites_visiveis.update()
-        depuracao(self.jogador.estatus)
+        self.ui.mostrar(self.jogador)
+        # depuracao(self.jogador.estatus)
+        
             
 class MovimentoCamera(pygame.sprite.Group):
     def __init__(self):

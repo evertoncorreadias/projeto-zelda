@@ -18,7 +18,7 @@ class Jogador(pygame.sprite.Sprite):
         
          # MOVIMENTO
         self.direcao = pygame.math.Vector2()
-        self.speed = 5
+      
         
         # ATAQUE
         self.atacando = False
@@ -32,10 +32,20 @@ class Jogador(pygame.sprite.Sprite):
         self.indice_arma = 0
         self.arma = list(weapon_data.keys())[self.indice_arma]
         self.destruir_arma = destruir_arma
+        
         # TEMPORIZADOR DE TROCA DE ARMA
         self.pode_mudar_arma = True
         self.tempo_troca_arma = None
         self.duracao_troca = 200
+        
+        # ESTATISTICAS
+    
+        self.status = {'health': 180, 'energy': 60, 'attack': 10, 'magic':4, 'speed': 5}
+        self.vida = self.status['health'] *0.2
+        self.energia = self.status['energy'] *0.5
+        self.exp = 123
+        self.velocidade = self.status['speed']
+        
         
         
     def importar_imagem_jogador(self):
@@ -170,5 +180,5 @@ class Jogador(pygame.sprite.Sprite):
         self.esfriamento()
         self.pegar_estatus()
         self.animar()
-        self.mover(self.speed)
+        self.mover(self.velocidade)
         
