@@ -10,8 +10,7 @@ class Jogo:
         self.janela = pygame.display.set_mode((LARGURA, ALTURA))
         self.relogio = pygame.time.Clock()
         self.nivel = Nivel()
-        
-    
+           
     def executar(self):
         while True:
             for event in pygame.event.get():

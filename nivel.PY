@@ -8,6 +8,7 @@ from suporte import *
 from random import choice
 from arma import Arma
 from ui import UI
+from inimigo import Inimigo
 
 
 class Nivel:
@@ -33,7 +34,8 @@ class Nivel:
         layouts = {
             'limite': importar_csv_layout('map/map_FloorBlocks.csv'),
             'grama': importar_csv_layout('map/map_Grass.csv'),
-            'objeto': importar_csv_layout('map/map_Objects.csv')
+            'objeto': importar_csv_layout('map/map_Objects.csv'),
+            'entities': importar_csv_layout('map/map_Entities.csv')
         }
         
         graficos = {
@@ -56,10 +58,27 @@ class Nivel:
                             superficie = graficos['objeto'][int(coluna)]
                             Tile((x, y), [self.sprites_visiveis, self.sprites_obstaculos],'objeto', superficie)
    
-        self.jogador = Jogador((2000,1430), [self. sprites_visiveis],self.sprites_obstaculos, self.criar_ataque, self.destruir_arma)
+                        if estilo == 'entities':
+                            if coluna == '394':
+                                self.jogador = Jogador((x,y),
+                                [self. sprites_visiveis],
+                                self.sprites_obstaculos,
+                                self.criar_ataque,
+                                self.destruir_arma,
+                                self.criar_magica)
+                            else:
+                                if coluna == '390': monster_name = 'bamboo'
+                                elif coluna == '391':monster_name = 'spirit'
+                                elif coluna == '392': monster_name = 'raccoon'
+                                else: monster_name = 'squid'
+                                Inimigo(monster_name, (x, y), [self. sprites_visiveis],self.sprites_obstaculos)
+    
     
     def criar_ataque(self):
-        self.ataque_atual = Arma(self.jogador,[self.sprites_visiveis])
+        self.ataque_atual = Arma(self.jogador,[self.sprites_visiveis],self.sprites_obstaculos)
+    
+    def criar_magica(self,estilo,forca,custo):
+        pass
     
     def destruir_arma(self): 
         if self.ataque_atual:
@@ -71,6 +90,7 @@ class Nivel:
         # ATUALIZAR E DESENHAR O JOGO
         self.sprites_visiveis.desenho_customizado(self.jogador)  # draw(self.exibe_superfice) SUBSTITUIDO PELA FUNÇAO CRIADA
         self.sprites_visiveis.update()
+        self.sprites_visiveis.inimigo_update(self.jogador)
         self.ui.mostrar(self.jogador)
         # depuracao(self.jogador.estatus)
         
@@ -100,7 +120,9 @@ class MovimentoCamera(pygame.sprite.Group):
             deslocamento_pos = sprite.rect.topleft - self.deslocamento_tela
             self.exibe_superfice.blit(sprite.image,deslocamento_pos) 
 
-    
-        
-    
-   
+       
+    def inimigo_update(self,jogador):
+        sprite_inimigo =[sprite for sprite in self.sprites() if hasattr(sprite, 'tipo_sprite') and  sprite.tipo_sprite == 'enemy']
+        for inimigo in sprite_inimigo:
+            inimigo.inimigo_update(jogador)
+       

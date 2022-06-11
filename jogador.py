@@ -1,9 +1,10 @@
 import pygame
 from config import*
 from suporte import importar_pasta
+from entidade import Entidade
 
-class Jogador(pygame.sprite.Sprite):
-    def __init__(self, pos, groups,sprites_obstaculos,criar_ataque,destruir_arma):
+class Jogador(Entidade):
+    def __init__(self, pos, groups,sprites_obstaculos,criar_ataque,destruir_arma,criar_magica):
         super().__init__(groups)
         self.image = pygame.image.load('graphics/test/player.png').convert_alpha() # CARREGANDO IMAGEM
         self.rect = self.image.get_rect(topleft =pos)  # CRIANDO E POSICIONANDO A IMAGEM 
@@ -12,14 +13,7 @@ class Jogador(pygame.sprite.Sprite):
         # GRAFICOS
         self.importar_imagem_jogador()
         self.estatus = "down"
-        self.indice_frame = 0
-        self.velocidade_animacao = 0.15
-                
-        
-         # MOVIMENTO
-        self.direcao = pygame.math.Vector2()
-      
-        
+         
         # ATAQUE
         self.atacando = False
         self.esfriar_ataque = 400
@@ -33,6 +27,13 @@ class Jogador(pygame.sprite.Sprite):
         self.arma = list(weapon_data.keys())[self.indice_arma]
         self.destruir_arma = destruir_arma
         
+        # MAGICA
+        self.criar_magica = criar_magica
+        self.indice_magica = 0
+        self.magica = list(magic_data.keys())[self.indice_magica]
+        self.pode_mudar_magica = True
+        self.tempo_troca_magica = None
+        
         # TEMPORIZADOR DE TROCA DE ARMA
         self.pode_mudar_arma = True
         self.tempo_troca_arma = None
@@ -45,9 +46,7 @@ class Jogador(pygame.sprite.Sprite):
         self.energia = self.status['energy'] *0.5
         self.exp = 123
         self.velocidade = self.status['speed']
-        
-        
-        
+                   
     def importar_imagem_jogador(self):
         pasta_personagens = 'graphics/player/'
         self.animacoes = {'up': [], 'down': [], 'left': [], 'right':[],
@@ -57,8 +56,7 @@ class Jogador(pygame.sprite.Sprite):
         for animacao in self.animacoes.keys():
             diretorio_completo = pasta_personagens + '/' + animacao
             self.animacoes[animacao] = importar_pasta(diretorio_completo)
-            
-        
+                   
     def controle(self): 
         if not self.atacando:
             teclas = pygame.key.get_pressed()
@@ -90,7 +88,10 @@ class Jogador(pygame.sprite.Sprite):
             if teclas[pygame.K_LCTRL]:
                 self.atacando =True
                 self.tempo_ataque = pygame.time.get_ticks()
-                print('magica')
+                estilo = list(magic_data.keys())[self.indice_magica]
+                forca = list(magic_data.values())[self.indice_magica]['strength'] + self.status['magic']
+                custo = list(magic_data.values())[self.indice_magica]['cost']
+                self.criar_magica(estilo, forca, custo)
                 
             if teclas[pygame.K_q] and self.pode_mudar_arma:
                 self.pode_mudar_arma = False
@@ -101,6 +102,16 @@ class Jogador(pygame.sprite.Sprite):
                 else:
                     self.indice_arma = 0
                 self.arma = list(weapon_data.keys())[self.indice_arma]
+                
+            if teclas[pygame.K_e] and self.pode_mudar_magica:
+                self.pode_mudar_magica = False
+                self.tempo_troca_magica = pygame.time.get_ticks()
+                
+                if self.indice_magica < len(list(magic_data.keys())) - 1:
+                    self.indice_magica += 1
+                else:
+                    self.indice_magica = 0
+                self.magica = list(magic_data.keys())[self.indice_magica]
         
     def pegar_estatus(self):
         
@@ -133,37 +144,7 @@ class Jogador(pygame.sprite.Sprite):
         # ACERTANDO A IMAGEM
         self.image = animacao[int(self.indice_frame)]
         self.rect = self.image.get_rect(center = self.ponto_colisao.center)
-                    
-    def mover(self,speed):
-        if self.direcao.magnitude() != 0:             # REDUZIR VELOCIDAD NA DIAGONAL
-            self.direcao = self.direcao.normalize()   # REDUZIR VELOCIDAD NA DIAGONAL
-        
-        
-        self.ponto_colisao.x += self.direcao.x * speed       
-        self.colisao('horizontal')                  # COLISAO HORIZONTAL
-        self.ponto_colisao.y += self.direcao.y * speed
-        self.colisao('vertical')                    # COLISAO VERTICAL
-        self.rect.center = self.ponto_colisao.center
-        
-    def colisao(self,direcao):
-        
-        
-        if direcao == 'horizontal':
-            for sprite in self.sprites_obstaculos:
-                if sprite.ponto_colisao.colliderect(self.ponto_colisao):
-                    if self.direcao.x > 0: # MOVENDO PARA DIREITA
-                        self.ponto_colisao.right = sprite.ponto_colisao.left  # COLISAO
-                    if self.direcao.x < 0: # MOVENDO PARA ESQUERDA
-                        self.ponto_colisao.left = sprite.ponto_colisao.right # COLISAO
-                        
-        if direcao == 'vertical':
-            for sprite in self.sprites_obstaculos:
-                if sprite.ponto_colisao.colliderect(self.ponto_colisao):
-                    if self.direcao.y > 0: # MOVENDO PARA BAIXO
-                        self.ponto_colisao.bottom = sprite.ponto_colisao.top  # COLISAO
-                    if self.direcao.y < 0: # MOVENDO PARA CIMA
-                        self.ponto_colisao.top = sprite.ponto_colisao.bottom # COLISAO
-                                               
+                                                                  
     def esfriamento(self):   # conta o tempo de ataque do jogador
         tempo_atual = pygame.time.get_ticks()  
         if self.atacando:
@@ -174,6 +155,10 @@ class Jogador(pygame.sprite.Sprite):
         if not self.pode_mudar_arma:
             if tempo_atual - self.tempo_troca_arma > self.duracao_troca:
                 self.pode_mudar_arma = True
+        
+        if not self.pode_mudar_magica:
+            if tempo_atual - self.tempo_troca_magica > self.duracao_troca:
+                self.pode_mudar_magica = True
             
     def update(self):
         self.controle()
