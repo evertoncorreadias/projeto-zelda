@@ -31,6 +31,16 @@ class Inimigo(Entidade):
         self.raio_info = monster_info['notice_radius']
         self.tipo_ataque = monster_info['attack_type']
         
+        # INTERAÇÃO JOGADOR
+        self.pode_atacar = True
+        self.tempo_ataque = None
+        self.esfriamento_ataque = 400
+        
+        # TEMPO DE INVENCIBILIDADE
+        self.vulneravel = True
+        self.tempo_de_hit = None
+        self.duracao_invencibilidade =300
+        
         
     def importar_graficos(self,nome):
         self.animacoes = {'idle': [], 'move':[], 'attack':[]}
@@ -52,12 +62,14 @@ class Inimigo(Entidade):
         
         return distancia, direcao
             
-    def pegar_estatus(self,jogador):
+    def pegar_estatus(self,jogador): 
         
         distancia = self.pegar_distancia_direcao_jogador(jogador)[0]
         
-        if distancia <= self.raio_ataque:
-             self.estatus = 'attack'
+        if distancia <= self.raio_ataque and self.pode_atacar:
+            if self.estatus != 'attack':
+                self.indice_frame = 0
+            self.estatus = 'attack'
         elif distancia <= self.raio_info:
             self.estatus = 'move'
         else:
@@ -65,14 +77,45 @@ class Inimigo(Entidade):
             
     def acoes(self,jogador):
         if self.estatus == 'attack':
-            pass
+            self.tempo_ataque = pygame.time.get_ticks()
         elif self.estatus =='move':
             self.direcao = self.pegar_distancia_direcao_jogador(jogador)[1]
         else:
             self.direcao = pygame.math.Vector2()
+    
+    def animar(self):
+        animacao = self.animacoes[self.estatus]
         
+        self.indice_frame += self.velocidade_animacao
+        if self.indice_frame >= len(animacao):
+            if self.estatus == 'attack':
+                self.pode_atacar = False
+            self.indice_frame = 0
+            
+        self.image = animacao[int(self.indice_frame)]
+        self.rect = self.image.get_rect(center = self.ponto_colisao.center)
+            
+    def esfriamento(self):
+        if not self.pode_atacar:
+            tempo_atual = pygame.time.get_ticks()
+            if tempo_atual - self.tempo_ataque >= self.esfriamento_ataque:
+                self.pode_atacar = True
+    
+    def pegar_dano(self,jogador,tipo_ataque):   
+        if tipo_ataque == 'weapon':
+            self.vida -= jogador.pegar_dano_arma()  
+        else:
+            pass
+        
+    def checar_morte(self):
+        if self.vida <= 0:
+            self.kill()
+               
     def update(self):
         self.mover(self.velocidade)
+        self.animar()
+        self.esfriamento()
+        self.checar_morte()
         
     def inimigo_update(self,jogador):
        self.pegar_estatus(jogador)

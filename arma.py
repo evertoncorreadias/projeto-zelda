@@ -3,6 +3,7 @@ import pygame
 class Arma(pygame.sprite.Sprite):
     def __init__(self,jogador,groups):
         super().__init__(groups)
+        self.tipo_sprite = 'weapon'
         direcao = jogador.estatus.split('_')[0]
         
         # GRAFICO

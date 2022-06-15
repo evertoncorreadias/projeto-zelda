@@ -144,11 +144,16 @@ class Jogador(Entidade):
         # ACERTANDO A IMAGEM
         self.image = animacao[int(self.indice_frame)]
         self.rect = self.image.get_rect(center = self.ponto_colisao.center)
+    
+    def pegar_dano_arma(self):
+        base_dano = self.status['attack']
+        dano_arma = weapon_data[self.arma]['damage']
+        return base_dano + dano_arma
                                                                   
     def esfriamento(self):   # conta o tempo de ataque do jogador
         tempo_atual = pygame.time.get_ticks()  
         if self.atacando:
-            if tempo_atual - self.tempo_ataque >= self.esfriar_ataque:  
+            if tempo_atual - self.tempo_ataque >= self.esfriar_ataque + weapon_data[self.arma]['cooldown']:  
                 self.atacando = False  
                 self.destruir_arma() 
                 

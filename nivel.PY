@@ -21,6 +21,8 @@ class Nivel:
         
         # SPRITE ATAQUE
         self.ataque_atual = None
+        self.atacar_sprites = pygame.sprite.Group()
+        self.sprites_atacaveis = pygame.sprite.Group()
         
         # CONFIGURAÇÃO DE SPRITES
         self.criar_mapa()
@@ -52,7 +54,11 @@ class Nivel:
                             Tile( (x, y), [self.sprites_obstaculos],'invisivel')
                         if estilo == 'grama':
                             imagem_grama_aleatoria = choice(graficos['grama'])
-                            Tile((x, y), [self.sprites_visiveis, self.sprites_obstaculos],'grama',imagem_grama_aleatoria)
+                            Tile((x, y), [self.sprites_visiveis,
+                                          self.sprites_atacaveis,
+                                          self.sprites_obstaculos
+                                          ],
+                                 'grama',imagem_grama_aleatoria)
                             
                         if estilo == 'objeto':
                             superficie = graficos['objeto'][int(coluna)]
@@ -71,11 +77,14 @@ class Nivel:
                                 elif coluna == '391':monster_name = 'spirit'
                                 elif coluna == '392': monster_name = 'raccoon'
                                 else: monster_name = 'squid'
-                                Inimigo(monster_name, (x, y), [self. sprites_visiveis],self.sprites_obstaculos)
+                                Inimigo(monster_name, (x, y),
+                                        [self.sprites_visiveis, 
+                                         self.sprites_atacaveis],
+                                        self.sprites_obstaculos)
     
     
     def criar_ataque(self):
-        self.ataque_atual = Arma(self.jogador,[self.sprites_visiveis],self.sprites_obstaculos)
+        self.ataque_atual = Arma(self.jogador,[self.sprites_visiveis, self.atacar_sprites])
     
     def criar_magica(self,estilo,forca,custo):
         pass
@@ -84,13 +93,24 @@ class Nivel:
         if self.ataque_atual:
             self.ataque_atual.kill()
         self.ataque_atual = None
-           
-                                                                                                         
+     
+    def logica_jogador(self):  
+        if self.atacar_sprites:
+            for ataque_sprite in self.atacar_sprites:
+                colisao_sprites = pygame.sprite.spritecollide(ataque_sprite,self.sprites_atacaveis,False)  
+                if colisao_sprites:
+                    for tragetoria_sprite in colisao_sprites:
+                        if tragetoria_sprite.tipo_sprite == 'grama':
+                            tragetoria_sprite.kill()
+                        else:
+                            tragetoria_sprite.pegar_dano(self.jogador, ataque_sprite.tipo_sprite )
+                                                                                                       
     def executar(self):
         # ATUALIZAR E DESENHAR O JOGO
         self.sprites_visiveis.desenho_customizado(self.jogador)  # draw(self.exibe_superfice) SUBSTITUIDO PELA FUNÇAO CRIADA
         self.sprites_visiveis.update()
         self.sprites_visiveis.inimigo_update(self.jogador)
+        self.logica_jogador()
         self.ui.mostrar(self.jogador)
         # depuracao(self.jogador.estatus)
         
