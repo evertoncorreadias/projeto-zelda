@@ -4,7 +4,7 @@ from entidade import Entidade
 from suporte import *
 
 class Inimigo(Entidade):
-    def __init__(self, nome_monstro, pos, groups,sprites_obstaculos):
+    def __init__(self, nome_monstro, pos, groups,sprites_obstaculos,dano_jogador):
         super().__init__(groups)
         
         self.tipo_sprite = 'enemy'
@@ -35,13 +35,13 @@ class Inimigo(Entidade):
         self.pode_atacar = True
         self.tempo_ataque = None
         self.esfriamento_ataque = 400
+        self.dano_jogador = dano_jogador
         
         # TEMPO DE INVENCIBILIDADE
         self.vulneravel = True
         self.tempo_de_hit = None
         self.duracao_invencibilidade =300
-        
-        
+               
     def importar_graficos(self,nome):
         self.animacoes = {'idle': [], 'move':[], 'attack':[]}
         arquivo_principal = f'graphics/monsters/{nome}/'
@@ -78,6 +78,7 @@ class Inimigo(Entidade):
     def acoes(self,jogador):
         if self.estatus == 'attack':
             self.tempo_ataque = pygame.time.get_ticks()
+            self.dano_jogador(self.dano_ataque, self.tipo_ataque)
         elif self.estatus =='move':
             self.direcao = self.pegar_distancia_direcao_jogador(jogador)[1]
         else:
@@ -94,24 +95,41 @@ class Inimigo(Entidade):
             
         self.image = animacao[int(self.indice_frame)]
         self.rect = self.image.get_rect(center = self.ponto_colisao.center)
-            
+        if not self.vulneravel:
+            alpha = self.valor_onda()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)          
+                
     def esfriamento(self):
+        tempo_atual = pygame.time.get_ticks()
         if not self.pode_atacar:
-            tempo_atual = pygame.time.get_ticks()
             if tempo_atual - self.tempo_ataque >= self.esfriamento_ataque:
                 self.pode_atacar = True
-    
-    def pegar_dano(self,jogador,tipo_ataque):   
-        if tipo_ataque == 'weapon':
-            self.vida -= jogador.pegar_dano_arma()  
-        else:
-            pass
+        if not self.vulneravel:
+            if tempo_atual - self.tempo_de_hit >= self.duracao_invencibilidade:
+                self.vulneravel = True
+            
+    def pegar_dano(self,jogador,tipo_ataque):
+        if self.vulneravel:
+            self.direcao = self.pegar_distancia_direcao_jogador(jogador)[1]
+            if tipo_ataque == 'weapon':
+                self.vida -= jogador.pegar_dano_arma()  
+            else:
+                pass
+        self.tempo_de_hit = pygame.time.get_ticks()
+        self.vulneravel = False
         
     def checar_morte(self):
         if self.vida <= 0:
             self.kill()
-               
+            
+    def recuo_inimigo(self): # INIMIGO RECUA AO SER ATINGIDO
+        if not self.vulneravel:
+            self.direcao *= -self.resistencia
+                     
     def update(self):
+        self.recuo_inimigo()
         self.mover(self.velocidade)
         self.animar()
         self.esfriamento()

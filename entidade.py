@@ -1,4 +1,5 @@
 import pygame
+from math import sin
 
 class Entidade(pygame.sprite.Sprite):
     def __init__(self, groups):
@@ -6,8 +7,7 @@ class Entidade(pygame.sprite.Sprite):
         self.indice_frame = 0
         self.velocidade_animacao = 0.15
         self.direcao = pygame.math.Vector2()
-        
-    
+          
     def mover(self,speed):
         if self.direcao.magnitude() != 0:             # REDUZIR VELOCIDAD NA DIAGONAL
             self.direcao = self.direcao.normalize()   # REDUZIR VELOCIDAD NA DIAGONAL
@@ -17,10 +17,8 @@ class Entidade(pygame.sprite.Sprite):
         self.ponto_colisao.y += self.direcao.y * speed
         self.colisao('vertical')                    # COLISAO VERTICAL
         self.rect.center = self.ponto_colisao.center
-        
-    def colisao(self,direcao):
-        
-        
+           
+    def colisao(self,direcao):     
         if direcao == 'horizontal':
             for sprite in self.sprites_obstaculos:
                 if sprite.ponto_colisao.colliderect(self.ponto_colisao):
@@ -36,3 +34,10 @@ class Entidade(pygame.sprite.Sprite):
                         self.ponto_colisao.bottom = sprite.ponto_colisao.top  # COLISAO
                     if self.direcao.y < 0: # MOVENDO PARA CIMA
                         self.ponto_colisao.top = sprite.ponto_colisao.bottom # COLISAO
+                               
+    def valor_onda(self):
+        valor = sin(pygame.time.get_ticks())
+        if valor >= 0:
+            return 255
+        else: 
+            return 0

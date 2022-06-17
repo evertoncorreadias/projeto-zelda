@@ -2,6 +2,7 @@ import pygame
 from arma import Arma
 from config import *
 from jogador import Jogador
+from particulas import AnimacaoJogador
 from tile import Tile
 from depuracao import depuracao
 from suporte import *
@@ -30,7 +31,9 @@ class Nivel:
         # INTERFACE DO USUARIO
         self.ui = UI()
         
-               
+        # PARTICULAS
+        self.animacao_jogador = AnimacaoJogador()
+                      
     def criar_mapa(self):
         
         layouts = {
@@ -80,9 +83,9 @@ class Nivel:
                                 Inimigo(monster_name, (x, y),
                                         [self.sprites_visiveis, 
                                          self.sprites_atacaveis],
-                                        self.sprites_obstaculos)
-    
-    
+                                        self.sprites_obstaculos,
+                                        self.dano_jogador)
+       
     def criar_ataque(self):
         self.ataque_atual = Arma(self.jogador,[self.sprites_visiveis, self.atacar_sprites])
     
@@ -104,7 +107,13 @@ class Nivel:
                             tragetoria_sprite.kill()
                         else:
                             tragetoria_sprite.pegar_dano(self.jogador, ataque_sprite.tipo_sprite )
-                                                                                                       
+    
+    def dano_jogador(self, montante, tipo_ataque):
+        if self.jogador.vulneravel:
+            self.jogador.vida -= montante
+            self.jogador.vulneravel = False
+            self.jogador.tempo_dor = pygame.time.get_ticks()
+                                                                                                           
     def executar(self):
         # ATUALIZAR E DESENHAR O JOGO
         self.sprites_visiveis.desenho_customizado(self.jogador)  # draw(self.exibe_superfice) SUBSTITUIDO PELA FUNÇAO CRIADA
@@ -139,8 +148,7 @@ class MovimentoCamera(pygame.sprite.Group):
         for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):
             deslocamento_pos = sprite.rect.topleft - self.deslocamento_tela
             self.exibe_superfice.blit(sprite.image,deslocamento_pos) 
-
-       
+      
     def inimigo_update(self,jogador):
         sprite_inimigo =[sprite for sprite in self.sprites() if hasattr(sprite, 'tipo_sprite') and  sprite.tipo_sprite == 'enemy']
         for inimigo in sprite_inimigo:

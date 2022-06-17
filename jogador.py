@@ -46,6 +46,11 @@ class Jogador(Entidade):
         self.energia = self.status['energy'] *0.5
         self.exp = 123
         self.velocidade = self.status['speed']
+        
+        # TIMER DANO
+        self.vulneravel = True
+        self.tempo_dor = None
+        self.duracao_vulnerabilidade = 500       
                    
     def importar_imagem_jogador(self):
         pasta_personagens = 'graphics/player/'
@@ -144,6 +149,12 @@ class Jogador(Entidade):
         # ACERTANDO A IMAGEM
         self.image = animacao[int(self.indice_frame)]
         self.rect = self.image.get_rect(center = self.ponto_colisao.center)
+        
+        if not self. vulneravel:
+            alpha = self.valor_onda()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)
     
     def pegar_dano_arma(self):
         base_dano = self.status['attack']
@@ -164,6 +175,11 @@ class Jogador(Entidade):
         if not self.pode_mudar_magica:
             if tempo_atual - self.tempo_troca_magica > self.duracao_troca:
                 self.pode_mudar_magica = True
+                
+        if not self.vulneravel:
+            if tempo_atual - self.tempo_dor >= self.duracao_vulnerabilidade:
+                self.vulneravel = True
+            
             
     def update(self):
         self.controle()
