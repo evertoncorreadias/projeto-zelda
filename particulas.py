@@ -1,6 +1,7 @@
 from mimetypes import init
 import pygame
 from suporte import importar_pasta
+from random import choice
 
 class AnimacaoJogador:
     def __init__(self):
@@ -41,13 +42,21 @@ class AnimacaoJogador:
         }
         
         
-    def relexo_imagem(self,frames):  
+    def reflexo_imagem(self,frames):  
         novos_frames = []
         for frame in frames:
             giro_frame = pygame.transform.flip(frame,True,False)
             novos_frames.append(giro_frame)
         return novos_frames      
 
+    def criar_particulas_grama(self, pos, groups):
+        animacao_frames = choice(self.frames['leaf'])
+        EfeitoParticula(pos,animacao_frames,groups)
+        
+    def criar_particulas(self, tipo_animacao, pos,groups):
+        frames_animacao = self.frames[tipo_animacao]
+        EfeitoParticula(pos, frames_animacao, groups)
+        
     
 class EfeitoParticula(pygame.sprite.Sprite):
     def __init__(self, pos ,frames_animacao, groups):
@@ -55,12 +64,13 @@ class EfeitoParticula(pygame.sprite.Sprite):
         self.indice_frame = 0
         self.velocidade_animacao = 0.15
         self.frames = frames_animacao
-        self.image = self.image.get_rect[self.indice_frame]
+        self.image = self.frames[self.indice_frame]
+        self.rect = self.image.get_rect(center = pos)
     
         
     def animar(self):
         self.indice_frame += self.velocidade_animacao
-        if self.frame >= len(self.frames):
+        if self.indice_frame >= len(self.frames):
             self.kill()
         else:
             self.image = self.frames[int(self.indice_frame)]

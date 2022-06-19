@@ -41,9 +41,9 @@ class Jogador(Entidade):
         
         # ESTATISTICAS
     
-        self.status = {'health': 180, 'energy': 60, 'attack': 10, 'magic':4, 'speed': 5}
+        self.status = {'health': 100, 'energy': 60, 'attack': 10, 'magic':4, 'speed': 5}
         self.vida = self.status['health'] *0.2
-        self.energia = self.status['energy'] *0.5
+        self.energia = self.status['energy'] 
         self.exp = 123
         self.velocidade = self.status['speed']
         
@@ -180,11 +180,17 @@ class Jogador(Entidade):
             if tempo_atual - self.tempo_dor >= self.duracao_vulnerabilidade:
                 self.vulneravel = True
             
-            
+    def recuperar_energia(self):
+        if self.energia < self.status['energy']:
+            self.energia += 0.05 * self.status['magic']
+        else:
+            self.energia = self.status['energy']
+                
     def update(self):
         self.controle()
         self.esfriamento()
         self.pegar_estatus()
         self.animar()
         self.mover(self.velocidade)
+        self.recuperar_energia()
         

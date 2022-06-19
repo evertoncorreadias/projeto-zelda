@@ -4,7 +4,7 @@ from entidade import Entidade
 from suporte import *
 
 class Inimigo(Entidade):
-    def __init__(self, nome_monstro, pos, groups,sprites_obstaculos,dano_jogador):
+    def __init__(self, nome_monstro, pos, groups,sprites_obstaculos,dano_jogador, particulas_morte):
         super().__init__(groups)
         
         self.tipo_sprite = 'enemy'
@@ -36,6 +36,7 @@ class Inimigo(Entidade):
         self.tempo_ataque = None
         self.esfriamento_ataque = 400
         self.dano_jogador = dano_jogador
+        self.particulas_morte = particulas_morte
         
         # TEMPO DE INVENCIBILIDADE
         self.vulneravel = True
@@ -123,6 +124,7 @@ class Inimigo(Entidade):
     def checar_morte(self):
         if self.vida <= 0:
             self.kill()
+            self.particulas_morte(self.rect.center, self.monster_name)
             
     def recuo_inimigo(self): # INIMIGO RECUA AO SER ATINGIDO
         if not self.vulneravel:

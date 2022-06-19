@@ -6,10 +6,12 @@ from particulas import AnimacaoJogador
 from tile import Tile
 from depuracao import depuracao
 from suporte import *
-from random import choice
+from random import choice,randint
 from arma import Arma
 from ui import UI
 from inimigo import Inimigo
+from particulas import AnimacaoJogador
+from magica import MagicaJogador
 
 
 class Nivel:
@@ -33,6 +35,7 @@ class Nivel:
         
         # PARTICULAS
         self.animacao_jogador = AnimacaoJogador()
+        self.magica_jogador = MagicaJogador(self.animacao_jogador)
                       
     def criar_mapa(self):
         
@@ -84,13 +87,17 @@ class Nivel:
                                         [self.sprites_visiveis, 
                                          self.sprites_atacaveis],
                                         self.sprites_obstaculos,
-                                        self.dano_jogador)
+                                        self.dano_jogador,
+                                        self.particulas_morte)
        
     def criar_ataque(self):
         self.ataque_atual = Arma(self.jogador,[self.sprites_visiveis, self.atacar_sprites])
     
     def criar_magica(self,estilo,forca,custo):
-        pass
+        if estilo == 'heal':
+            self.magica_jogador.heal(self.jogador, forca, custo,[self.sprites_visiveis])
+        if estilo == 'flame':
+            self.magica_jogador.flame(self.jogador, custo,[self.sprites_visiveis])
     
     def destruir_arma(self): 
         if self.ataque_atual:
@@ -104,6 +111,10 @@ class Nivel:
                 if colisao_sprites:
                     for tragetoria_sprite in colisao_sprites:
                         if tragetoria_sprite.tipo_sprite == 'grama':
+                            pos = tragetoria_sprite.rect.center
+                            offset = pygame.math.Vector2(0, 75)
+                            for leaf in range(randint(3, 6)):
+                                self.animacao_jogador.criar_particulas_grama(pos- offset, [self.sprites_visiveis])
                             tragetoria_sprite.kill()
                         else:
                             tragetoria_sprite.pegar_dano(self.jogador, ataque_sprite.tipo_sprite )
@@ -113,7 +124,11 @@ class Nivel:
             self.jogador.vida -= montante
             self.jogador.vulneravel = False
             self.jogador.tempo_dor = pygame.time.get_ticks()
-                                                                                                           
+            self.animacao_jogador.criar_particulas(tipo_ataque, self.jogador.rect.center,[self.sprites_visiveis])   
+    
+    def particulas_morte(self, pos,tipo_particulas):
+        self.animacao_jogador.criar_particulas(tipo_particulas, pos, self.sprites_visiveis)
+                                                                                                        
     def executar(self):
         # ATUALIZAR E DESENHAR O JOGO
         self.sprites_visiveis.desenho_customizado(self.jogador)  # draw(self.exibe_superfice) SUBSTITUIDO PELA FUNÇAO CRIADA
@@ -121,8 +136,7 @@ class Nivel:
         self.sprites_visiveis.inimigo_update(self.jogador)
         self.logica_jogador()
         self.ui.mostrar(self.jogador)
-        # depuracao(self.jogador.estatus)
-        
+        # depuracao(self.jogador.estatus)   
             
 class MovimentoCamera(pygame.sprite.Group):
     def __init__(self):
