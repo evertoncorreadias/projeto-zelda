@@ -12,12 +12,14 @@ from ui import UI
 from inimigo import Inimigo
 from particulas import AnimacaoJogador
 from magica import MagicaJogador
+from upgrade import Atualizar
 
 
 class Nivel:
     def __init__(self):
         # EXIBE A SUPERFICE
         self.exibe_superfice = pygame.display.get_surface()
+        self.pausa_jogo = False
         # GRUPOS DE SPRITES
         self.sprites_visiveis = MovimentoCamera()# pygame.sprite.Group()/modificado com criaçao a camera # GRUPO COM SPRITES VISÍVEIS
         self.sprites_obstaculos = pygame.sprite.Group() # GRUPO DE SPRITES OBSTACULOS 
@@ -32,6 +34,7 @@ class Nivel:
         
         # INTERFACE DO USUARIO
         self.ui = UI()
+        self.upgrade = Atualizar(self.jogador)
         
         # PARTICULAS
         self.animacao_jogador = AnimacaoJogador()
@@ -88,7 +91,8 @@ class Nivel:
                                          self.sprites_atacaveis],
                                         self.sprites_obstaculos,
                                         self.dano_jogador,
-                                        self.particulas_morte)
+                                        self.particulas_morte,
+                                        self.add_exp)
        
     def criar_ataque(self):
         self.ataque_atual = Arma(self.jogador,[self.sprites_visiveis, self.atacar_sprites])
@@ -97,7 +101,7 @@ class Nivel:
         if estilo == 'heal':
             self.magica_jogador.heal(self.jogador, forca, custo,[self.sprites_visiveis])
         if estilo == 'flame':
-            self.magica_jogador.flame(self.jogador, custo,[self.sprites_visiveis])
+            self.magica_jogador.flame(self.jogador, custo,[self.sprites_visiveis,self.atacar_sprites])
     
     def destruir_arma(self): 
         if self.ataque_atual:
@@ -128,14 +132,24 @@ class Nivel:
     
     def particulas_morte(self, pos,tipo_particulas):
         self.animacao_jogador.criar_particulas(tipo_particulas, pos, self.sprites_visiveis)
+
+    def add_exp(self, montante):
+        self.jogador.exp += montante
+    
+    def alternar_menu(self):
+        self.pausa_jogo = not self.pausa_jogo
                                                                                                         
     def executar(self):
-        # ATUALIZAR E DESENHAR O JOGO
         self.sprites_visiveis.desenho_customizado(self.jogador)  # draw(self.exibe_superfice) SUBSTITUIDO PELA FUNÇAO CRIADA
-        self.sprites_visiveis.update()
-        self.sprites_visiveis.inimigo_update(self.jogador)
-        self.logica_jogador()
         self.ui.mostrar(self.jogador)
+        if self.pausa_jogo:
+           self.upgrade.display()
+        else:
+            # ATUALIZAR E DESENHAR O JOGO
+            self.sprites_visiveis.update()
+            self.sprites_visiveis.inimigo_update(self.jogador)
+            self.logica_jogador()
+        
         # depuracao(self.jogador.estatus)   
             
 class MovimentoCamera(pygame.sprite.Group):

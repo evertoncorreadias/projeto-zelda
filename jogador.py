@@ -8,7 +8,7 @@ class Jogador(Entidade):
         super().__init__(groups)
         self.image = pygame.image.load('graphics/test/player.png').convert_alpha() # CARREGANDO IMAGEM
         self.rect = self.image.get_rect(topleft =pos)  # CRIANDO E POSICIONANDO A IMAGEM 
-        self.ponto_colisao = self.rect.inflate(0,-26) # DIMINUI OS SPRITES NO PONTO DE COLISAO JOGADOR
+        self.ponto_colisao = self.rect.inflate(-6, HITBOX_OFFSET['player']) # DIMINUI OS SPRITES NO PONTO DE COLISAO JOGADOR
         
         # GRAFICOS
         self.importar_imagem_jogador()
@@ -42,15 +42,21 @@ class Jogador(Entidade):
         # ESTATISTICAS
     
         self.status = {'health': 100, 'energy': 60, 'attack': 10, 'magic':4, 'speed': 5}
-        self.vida = self.status['health'] *0.2
+        self.status_max = {'health': 300, 'energy': 140, 'attack': 20, 'magic':10, 'speed': 12}
+        self.atualizar_custo = {'health': 100, 'energy': 100, 'attack': 100, 'magic':100, 'speed': 100}
+        self.vida = self.status['health'] 
         self.energia = self.status['energy'] 
-        self.exp = 123
+        self.exp = 5000
         self.velocidade = self.status['speed']
         
         # TIMER DANO
         self.vulneravel = True
         self.tempo_dor = None
-        self.duracao_vulnerabilidade = 500       
+        self.duracao_vulnerabilidade = 500     
+        
+        # IMPORTAR SOM
+        self.som_ataque = pygame.mixer.Sound('audio/sword.wav')
+        self.som_ataque.set_volume(0.4)
                    
     def importar_imagem_jogador(self):
         pasta_personagens = 'graphics/player/'
@@ -88,6 +94,7 @@ class Jogador(Entidade):
                 self.atacando =True
                 self.tempo_ataque = pygame.time.get_ticks()
                 self.criar_ataque()
+                self.som_ataque.play()
                 
             # MAGICA DO JOGADOR
             if teclas[pygame.K_LCTRL]:
@@ -160,7 +167,18 @@ class Jogador(Entidade):
         base_dano = self.status['attack']
         dano_arma = weapon_data[self.arma]['damage']
         return base_dano + dano_arma
-                                                                  
+    
+    def pegar_dano_magica(self):
+        base_dano = self.status['magic']
+        dano_arma = magic_data[self.magic]['strength']
+        return base_dano + dano_arma
+    
+    def pegar_valor_indice(self, indice):
+        return list(self.status.values())[indice]                                                                  
+    
+    def pegar_custo_indice(self, indice):
+        return list(self.atualizar_custo.values())[indice]
+    
     def esfriamento(self):   # conta o tempo de ataque do jogador
         tempo_atual = pygame.time.get_ticks()  
         if self.atacando:
@@ -191,6 +209,6 @@ class Jogador(Entidade):
         self.esfriamento()
         self.pegar_estatus()
         self.animar()
-        self.mover(self.velocidade)
+        self.mover(self.status['speed'])
         self.recuperar_energia()
         

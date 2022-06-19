@@ -5,6 +5,7 @@ LARGURA = 1280
 ALTURA =  720
 FPS = 60
 TILESIZE = 64    # TAMANHO DO LADRILHO "SPRITES"
+HITBOX_OFFSET = {'player': -26, 'objeto': -40, 'grama': -10, 'invisivel': 0}
 
 
 # UI
@@ -26,6 +27,12 @@ HEALTH_COLOR = 'red'
 ENERGY_COLOR = 'blue'
 UI_BORDER_COLOR_ACTIVE = 'gold'
 
+# ATUALIZAÇAO MENU
+TEXT_COLOR_SELECTED = '#111111'
+BAR_COLOR = '#EEEEEE'
+BAR_COLOR_SELECTED = '#111111'
+UPGRADE_BG_COLOR_SELECTED = '#EEEEEE'
+
 # ARMAS
 weapon_data ={
      'sword': { 'cooldown': 100, 'damage': 15, 'graphic': 'graphics/weapons/sword/full.png'},
@@ -35,7 +42,7 @@ weapon_data ={
      'sai':   { 'cooldown': 100, 'damage': 15, 'graphic': 'graphics/weapons/sai/full.png'}}
 
 magic_data = {
-     'flame': {'strength':5, 'cost': 20, 'graphic': 'graphics/particles/flame/fire.png'},
+     'flame': {'strength':20, 'cost': 20, 'graphic': 'graphics/particles/flame/fire.png'},
       'heal': {'strength':20, 'cost': 10, 'graphic': 'graphics/particles/heal/heal.png'}}
 
 # INIMIGOS

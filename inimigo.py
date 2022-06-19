@@ -4,7 +4,7 @@ from entidade import Entidade
 from suporte import *
 
 class Inimigo(Entidade):
-    def __init__(self, nome_monstro, pos, groups,sprites_obstaculos,dano_jogador, particulas_morte):
+    def __init__(self, nome_monstro, pos, groups,sprites_obstaculos,dano_jogador, particulas_morte, add_exp):
         super().__init__(groups)
         
         self.tipo_sprite = 'enemy'
@@ -37,12 +37,21 @@ class Inimigo(Entidade):
         self.esfriamento_ataque = 400
         self.dano_jogador = dano_jogador
         self.particulas_morte = particulas_morte
+        self.add_exp = add_exp
         
         # TEMPO DE INVENCIBILIDADE
         self.vulneravel = True
         self.tempo_de_hit = None
         self.duracao_invencibilidade =300
-               
+        
+        # SOM
+        self.som_morte = pygame.mixer.Sound('audio/death.wav')
+        self.som_hit = pygame.mixer.Sound('audio/hit.wav')
+        self.som_ataque = pygame.mixer.Sound(monster_info['attack_sound'])
+        self.som_morte.set_volume(0.2)
+        self.som_hit.set_volume(0.2)
+        self.som_ataque.set_volume(0.3)
+
     def importar_graficos(self,nome):
         self.animacoes = {'idle': [], 'move':[], 'attack':[]}
         arquivo_principal = f'graphics/monsters/{nome}/'
@@ -80,6 +89,7 @@ class Inimigo(Entidade):
         if self.estatus == 'attack':
             self.tempo_ataque = pygame.time.get_ticks()
             self.dano_jogador(self.dano_ataque, self.tipo_ataque)
+            self.som_ataque.play()
         elif self.estatus =='move':
             self.direcao = self.pegar_distancia_direcao_jogador(jogador)[1]
         else:
@@ -113,11 +123,12 @@ class Inimigo(Entidade):
             
     def pegar_dano(self,jogador,tipo_ataque):
         if self.vulneravel:
+            self.som_hit.play()
             self.direcao = self.pegar_distancia_direcao_jogador(jogador)[1]
             if tipo_ataque == 'weapon':
                 self.vida -= jogador.pegar_dano_arma()  
             else:
-                pass
+                self.vida -= jogador.pegar_dano_arma()
         self.tempo_de_hit = pygame.time.get_ticks()
         self.vulneravel = False
         
@@ -125,6 +136,8 @@ class Inimigo(Entidade):
         if self.vida <= 0:
             self.kill()
             self.particulas_morte(self.rect.center, self.monster_name)
+            self.add_exp(self.exp)
+            self.som_morte.play()
             
     def recuo_inimigo(self): # INIMIGO RECUA AO SER ATINGIDO
         if not self.vulneravel:

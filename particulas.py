@@ -61,6 +61,7 @@ class AnimacaoJogador:
 class EfeitoParticula(pygame.sprite.Sprite):
     def __init__(self, pos ,frames_animacao, groups):
         super().__init__(groups)
+        self.tipo_sprite = 'magic'
         self.indice_frame = 0
         self.velocidade_animacao = 0.15
         self.frames = frames_animacao

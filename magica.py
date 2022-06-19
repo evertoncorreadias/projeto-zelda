@@ -5,9 +5,13 @@ from random import randint
 class MagicaJogador:
     def __init__(self, animacao_jogador):
         self.animacao_jogador = animacao_jogador
+        self.sons = {'heal': pygame.mixer.Sound('audio/heal.wav'),
+                     'flame': pygame.mixer.Sound('audio/fire.wav')
+                     }
     
     def heal(self, jogador, forca, custo, groups):
         if jogador.energia >= custo:
+            self.sons['heal'].play()
             jogador.vida += forca
             jogador.energia -= custo
             if jogador.vida >= jogador.status['health']:
@@ -17,6 +21,7 @@ class MagicaJogador:
     
     def flame(self, jogador, custo, groups):
         if jogador.energia >= custo:
+            self.sons['flame'].play()
             jogador.energia -= custo
             
         if jogador.estatus.split('_')[0] == 'right': direcao = pygame.math.Vector2(1, 0)

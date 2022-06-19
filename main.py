@@ -10,6 +10,11 @@ class Jogo:
         self.janela = pygame.display.set_mode((LARGURA, ALTURA))
         self.relogio = pygame.time.Clock()
         self.nivel = Nivel()
+        
+        # SOM 
+        som_principal = pygame.mixer.Sound('audio/main.ogg')
+        som_principal.set_volume(0.5)
+        som_principal.play(loops = -1 )
            
     def executar(self):
         while True:
@@ -17,9 +22,12 @@ class Jogo:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_m:
+                        self.nivel.alternar_menu()
                     
 
-            self.janela.fill('black')
+            self.janela.fill(WATER_COLOR)
             self.relogio.tick(FPS)
             self.nivel.executar()
             pygame.display.update()
